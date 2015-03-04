@@ -6,16 +6,17 @@ open NUnit.Framework
 open Microsoft.FSharp.Linq.QuotationEvaluation
 
 let defaultCompile quote =
-    Compiler.Compiler.Compile(quote, noReturn = false, shouldCompress = true)
+    Compiler.Compiler.Compile(quote, noReturn = false, shouldCompress = false)
 
 let compileWithComponents components quote =
-    Compiler.Compiler.Compile(quote, components = components, noReturn = false, shouldCompress = true)
+    Compiler.Compiler.Compile(quote, components = components, noReturn = false, shouldCompress = false)
 
 let compileWithRx quote =
-      Compiler.Compiler.Compile(quote, components = Rx.Interop.components(), noReturn = false, isEventMappingEnabled = false, shouldCompress = true)
+      Compiler.Compiler.Compile(quote, components = Rx.Interop.components(), noReturn = false, isEventMappingEnabled = false, shouldCompress = false)
 
 let checkAreEqualWith prerequisiteJS compile (expectedResult : obj) quote =
    let code : string = compile quote
+   printfn "// Code:\n%s" code
    try
       let result =
           let code =
@@ -43,11 +44,11 @@ let checkAreEqualWith prerequisiteJS compile (expectedResult : obj) quote =
    with
     | :? System.AggregateException as e ->
         let ex = e.InnerException
-        printfn "// Code:\n%s" code
+        //printfn "// Code:\n%s" code
         if ex.GetType().Namespace.StartsWith "FunScript" then raise ex
         else failwithf "Message: %s\n" ex.Message
     | ex ->
-        printfn "// Code:\n%s" code
+        //printfn "// Code:\n%s" code
         if ex.GetType().Namespace.StartsWith "FunScript" then raise ex
         else failwithf "Message: %s\n" ex.Message
 

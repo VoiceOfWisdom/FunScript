@@ -298,7 +298,7 @@ type Compiler(components, outputModules) as this =
 
       member __.NextTempVar() = 
          incr nextId
-         Var(sprintf "_%i" !nextId, typeof<obj>, false) 
+         Quotations.Var(sprintf "_%i" !nextId, typeof<obj>, false) 
          
       member __.DefineGlobal moduleType name cons =
          let moduleName = (JavaScriptNameMapper.mapType moduleType)

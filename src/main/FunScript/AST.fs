@@ -83,7 +83,7 @@ let addVarsToScope vars oldScope =
             scope, name::acc) (oldScope, [])
     newScope, names |> List.rev
 
-type JSRef = string
+type PropKey = string
 
 type JSExpr =
    | Null
@@ -91,14 +91,14 @@ type JSExpr =
    | Number of float
    | Integer of int
    | String of string
-   | Reference of Var
-   | Object of (JSRef * JSExpr) list
-   | PropertyGet of JSExpr * JSRef
+   | Reference of JSReference
+   | Object of (PropKey * JSExpr) list
+   | PropertyGet of JSExpr * PropKey
    | IndexGet of JSExpr * JSExpr
    | Array of JSExpr list
    | Apply of JSExpr * JSExpr list
-   | New of Var * JSExpr list
-   | Lambda of Var list * JSBlock
+   | New of JSReference * JSExpr list
+   | Lambda of JSReference list * JSBlock
    | UnaryOp of string * JSExpr
    | BinaryOp of JSExpr * string * JSExpr
    | TernaryOp of JSExpr * string * JSExpr * string * JSExpr
@@ -111,7 +111,7 @@ type JSExpr =
       | Integer i -> sprintf "%d" i
       | Number f -> sprintf "%f" f
       | String str -> sprintf @"""%s""" (System.Web.HttpUtility.JavaScriptStringEncode(str))
-      | Reference ref -> (!scope).ObtainNameScope ref FromReference |> fst
+      | Reference var -> (!scope).ObtainNameScope var FromReference |> fst
       | Object propExprs ->
          let filling =
             propExprs |> List.map (fun (name, expr) ->
@@ -162,6 +162,12 @@ type JSExpr =
             (midExpr.Print(padding, scope)) rSymbol 
             (rhsExpr.Print(padding, scope))
       | EmitExpr code -> code(padding, scope)
+
+and JSReference = 
+   | Var of Var
+   | PropertyGet of PropertyGet
+
+and PropertyGet  = JSExpr * PropKey
 
 and JSStatement =
    | Declare of Var list
@@ -263,4 +269,3 @@ and JSBlock =
 
    member block.PrintCompressed() =
       block.Print(0, ref VariableScope.EmptyCompressing)
-      
